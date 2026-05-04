@@ -1,0 +1,40 @@
+[package]
+name = "torrents-trackers-desktop"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "TorrentsTrackers desktop app (Tauri 2)"
+license = "MIT"
+default-run = "torrents-trackers-desktop"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+chrono = { version = "0.4", features = ["serde"] }
+hex = "0.4"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# Workspace crates (paths are relative to this manifest).
+tt-core = { path = "../../../crates/core" }
+tt-storage = { path = "../../../crates/storage" }
+tt-sources = { path = "../../../crates/sources" }
+tt-identity = { path = "../../../crates/identity" }
+
+[features]
+# default ones used by tauri to enable the appropriate linker behaviour
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "abort"
