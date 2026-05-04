@@ -1,14 +1,7 @@
-use serde::Serialize;
 use tauri::State;
 use tt_downloads::DownloadInfo;
 
 use crate::state::AppState;
-
-#[derive(Debug, Serialize)]
-pub struct DownloadInfoDto {
-    #[serde(flatten)]
-    pub info: DownloadInfo,
-}
 
 #[tauri::command]
 pub async fn download_add(state: State<'_, AppState>, magnet: String) -> Result<usize, String> {
