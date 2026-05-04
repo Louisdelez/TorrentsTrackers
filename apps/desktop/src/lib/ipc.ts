@@ -6,6 +6,7 @@ import type {
   ChatEventDto,
   ChatMessage,
   ChatServerDto,
+  DownloadInfo,
   IdentityDto,
   PoolDto,
   SearchHitDto,
@@ -106,6 +107,21 @@ export const ipc = {
     limit: number | null,
   ): Promise<void> {
     return invoke("chat_history", { serverId, channel, limit });
+  },
+  async downloadAdd(magnet: string): Promise<number> {
+    return invoke("download_add", { magnet });
+  },
+  async downloadList(): Promise<DownloadInfo[]> {
+    return invoke("download_list");
+  },
+  async downloadPause(id: number): Promise<void> {
+    return invoke("download_pause", { id });
+  },
+  async downloadUnpause(id: number): Promise<void> {
+    return invoke("download_unpause", { id });
+  },
+  async downloadRemove(id: number): Promise<void> {
+    return invoke("download_remove", { id });
   },
 };
 

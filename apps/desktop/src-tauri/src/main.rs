@@ -7,6 +7,7 @@ mod state;
 use std::sync::Arc;
 
 use tracing_subscriber::EnvFilter;
+use tt_downloads::DownloadManager;
 use tt_storage::Database;
 
 use crate::state::AppState;
@@ -24,9 +25,15 @@ fn main() {
         std::fs::create_dir_all(parent).expect("create data dir");
     }
     let db = Database::open(&db_path).expect("open database");
+
+    let downloads_dir = tt_downloads::manager::default_data_dir().expect("downloads dir");
+    let downloads = tauri::async_runtime::block_on(DownloadManager::new(downloads_dir))
+        .expect("init download manager");
+
     let state = AppState {
         db: Arc::new(db),
         chats: Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new())),
+        downloads: Arc::new(downloads),
     };
 
     tauri::Builder::default()
@@ -55,6 +62,11 @@ fn main() {
             ipc::chat::chat_disconnect,
             ipc::chat::chat_send,
             ipc::chat::chat_history,
+            ipc::downloads::download_add,
+            ipc::downloads::download_list,
+            ipc::downloads::download_pause,
+            ipc::downloads::download_unpause,
+            ipc::downloads::download_remove,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

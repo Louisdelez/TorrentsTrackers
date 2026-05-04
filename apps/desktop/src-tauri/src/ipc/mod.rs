@@ -3,6 +3,7 @@
 //! consumes.
 
 pub mod chat;
+pub mod downloads;
 pub mod dto;
 pub mod identity;
 pub mod magnet;

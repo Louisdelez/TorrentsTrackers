@@ -7,6 +7,7 @@ members = [
     "crates/storage",
     "crates/chat",
     "crates/cli",
+    "crates/downloads",
 ]
 exclude = [
     "apps/desktop",
@@ -33,6 +34,7 @@ tt-sources = { path = "crates/sources" }
 tt-identity = { path = "crates/identity" }
 tt-storage = { path = "crates/storage" }
 tt-chat = { path = "crates/chat" }
+tt-downloads = { path = "crates/downloads" }
 
 # Async runtime
 tokio = { version = "1.42", features = ["full"] }
@@ -40,7 +42,7 @@ async-trait = "0.1"
 futures = "0.3"
 
 # Serialization
-serde = { version = "1", features = ["derive"] }
+serde = { version = "1", features = ["derive", "rc"] }
 serde_json = "1"
 
 # Errors
@@ -92,6 +94,9 @@ toml = "0.8"
 
 # Git
 gix = { version = "0.66", default-features = false, features = ["blocking-network-client", "blocking-http-transport-reqwest-rust-tls"] }
+
+# BitTorrent
+librqbit = { version = "8", default-features = false, features = ["rust-tls"] }
 
 [profile.release]
 lto = "thin"

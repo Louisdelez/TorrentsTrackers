@@ -12,6 +12,7 @@
   import PublishDialog from "$lib/components/PublishDialog.svelte";
   import IdentityBackupDialog from "$lib/components/IdentityBackupDialog.svelte";
   import ChatView from "$lib/components/ChatView.svelte";
+  import DownloadsView from "$lib/components/DownloadsView.svelte";
   import { ipc, onChatEvent } from "$lib/ipc";
   import { notifyChatMessage } from "$lib/notifications";
   import { app, showToast } from "$lib/stores.svelte";
@@ -203,6 +204,8 @@
         />
       {:else if app.view === "chat"}
         <ChatView />
+      {:else if app.view === "downloads"}
+        <DownloadsView />
       {:else}
         <div class="flex flex-1 overflow-hidden">
           <Browse />

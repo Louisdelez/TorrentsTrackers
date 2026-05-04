@@ -42,7 +42,7 @@ interface AppState {
   filtersOpen: boolean;
   paletteOpen: boolean;
 
-  view: "browse" | "settings" | "chat";
+  view: "browse" | "settings" | "chat" | "downloads";
   syncing: boolean;
   toast: string | null;
 

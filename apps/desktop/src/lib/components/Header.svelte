@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Search, Settings, RefreshCw, User, MessageSquare } from "lucide-svelte";
+  import { Search, Settings, RefreshCw, User, MessageSquare, Download } from "lucide-svelte";
   import { app } from "$lib/stores.svelte";
 
   let { onSearch, onSyncAll }: { onSearch: () => void; onSyncAll: () => void } = $props();
@@ -50,6 +50,16 @@
   </div>
 
   <div class="flex items-center gap-1.5">
+    <button
+      type="button"
+      class="icon-btn"
+      class:active={app.view === "downloads"}
+      title="Téléchargements"
+      onclick={() =>
+        (app.view = app.view === "downloads" ? "browse" : "downloads")}
+    >
+      <Download size={16} />
+    </button>
     <button
       type="button"
       class="icon-btn"

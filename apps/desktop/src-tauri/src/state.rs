@@ -3,6 +3,7 @@ use std::sync::Arc;
 
 use tokio::sync::Mutex;
 use tt_chat::ChatClient;
+use tt_downloads::DownloadManager;
 use tt_storage::Database;
 
 pub struct ChatConnection {
@@ -18,4 +19,5 @@ pub struct AppState {
     pub db: Arc<Database>,
     /// Keyed by `server_id` once authenticated, by URL until then.
     pub chats: Arc<Mutex<HashMap<String, ChatConnection>>>,
+    pub downloads: Arc<DownloadManager>,
 }

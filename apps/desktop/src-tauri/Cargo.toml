@@ -29,6 +29,7 @@ tt-storage = { path = "../../../crates/storage" }
 tt-sources = { path = "../../../crates/sources" }
 tt-identity = { path = "../../../crates/identity" }
 tt-chat = { path = "../../../crates/chat" }
+tt-downloads = { path = "../../../crates/downloads" }
 
 [features]
 # default ones used by tauri to enable the appropriate linker behaviour

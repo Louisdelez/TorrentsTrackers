@@ -94,6 +94,24 @@ export interface SearchQueryDto {
   limit: number | null;
 }
 
+export type DownloadStateDto =
+  | "initializing"
+  | "live"
+  | "paused"
+  | "finished"
+  | "error";
+
+export interface DownloadInfo {
+  id: number;
+  title: string;
+  progress_bytes: number;
+  total_bytes: number;
+  down_bps: number;
+  up_bps: number;
+  state: DownloadStateDto;
+  finished: boolean;
+}
+
 export interface ChatMessage {
   id: string;
   channel: string;
