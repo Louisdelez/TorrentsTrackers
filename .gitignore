@@ -1,8 +1,8 @@
 # Rust
 target/
-Cargo.lock
 **/*.rs.bk
 *.pdb
+# Cargo.lock is committed (workspace contains a binary).
 
 # Build artifacts
 dist/

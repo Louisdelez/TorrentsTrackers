@@ -4,6 +4,6 @@
 //! encrypted on disk as a fallback). Signs and verifies entries.
 
 pub mod keypair;
-pub mod signing;
 pub mod npub;
+pub mod signing;
 pub mod storage;

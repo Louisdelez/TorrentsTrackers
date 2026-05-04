@@ -30,29 +30,20 @@ pub struct PoolFilters {
     pub seeders_min: Option<u32>,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 pub enum DedupStrategy {
+    #[default]
     ByContentId,
     ByMagnetExact,
     None,
 }
 
-impl Default for DedupStrategy {
-    fn default() -> Self {
-        Self::ByContentId
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub enum ConflictStrategy {
     KeepAll { merge_metadata: bool },
     PreferSource(SourceId),
     PreferNewest,
+    #[default]
     PreferMostSeeded,
 }
 
-impl Default for ConflictStrategy {
-    fn default() -> Self {
-        Self::PreferMostSeeded
-    }
-}

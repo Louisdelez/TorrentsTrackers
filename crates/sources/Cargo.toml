@@ -9,7 +9,7 @@ description = "Source adapter implementations for TorrentsTrackers (Local, HTTP,
 
 [dependencies]
 tt-core.workspace = true
-tokio.workspace = true
+tokio = { workspace = true, features = ["full"] }
 async-trait.workspace = true
 serde.workspace = true
 serde_json.workspace = true
@@ -17,3 +17,8 @@ thiserror.workspace = true
 chrono.workspace = true
 tracing.workspace = true
 reqwest.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+tempfile = "3"
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }

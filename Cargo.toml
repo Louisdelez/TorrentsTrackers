@@ -73,6 +73,12 @@ rusqlite = { version = "0.32", features = ["bundled"] }
 # CLI
 clap = { version = "4", features = ["derive"] }
 
+# Misc
+regex = "1"
+dirs = "5"
+url = "2"
+hex = "0.4"
+
 [profile.release]
 lto = "thin"
 codegen-units = 1

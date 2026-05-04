@@ -16,3 +16,6 @@ blake3.workspace = true
 uuid.workspace = true
 ed25519-dalek.workspace = true
 async-trait.workspace = true
+regex.workspace = true
+url.workspace = true
+hex.workspace = true
