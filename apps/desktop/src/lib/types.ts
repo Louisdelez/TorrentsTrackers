@@ -94,6 +94,44 @@ export interface SearchQueryDto {
   limit: number | null;
 }
 
+export interface ChatMessage {
+  id: string;
+  channel: string;
+  author_pubkey: string;
+  content: string;
+  reply_to: string | null;
+  sent_at: string;
+  signature: string;
+}
+
+export interface ChatServerDto {
+  server_id: string;
+  server_name: string;
+  url: string;
+}
+
+export type ChatEventDto =
+  | {
+      kind: "authenticated";
+      server_id: string;
+      server_name: string;
+      url: string;
+    }
+  | { kind: "message"; server_id: string; message: ChatMessage }
+  | {
+      kind: "history";
+      server_id: string;
+      channel: string;
+      messages: ChatMessage[];
+    }
+  | {
+      kind: "error";
+      server_id: string;
+      code: string;
+      message: string;
+    }
+  | { kind: "disconnected"; server_id: string; reason: string };
+
 export const CATEGORIES: { id: Category; label: string }[] = [
   { id: "Films", label: "Films" },
   { id: "Series", label: "Séries" },

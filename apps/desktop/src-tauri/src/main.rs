@@ -24,7 +24,10 @@ fn main() {
         std::fs::create_dir_all(parent).expect("create data dir");
     }
     let db = Database::open(&db_path).expect("open database");
-    let state = AppState { db: Arc::new(db) };
+    let state = AppState {
+        db: Arc::new(db),
+        chats: Arc::new(tokio::sync::Mutex::new(std::collections::HashMap::new())),
+    };
 
     tauri::Builder::default()
         .manage(state)
@@ -46,6 +49,11 @@ fn main() {
             ipc::publish::publish,
             ipc::magnet::open_magnet,
             ipc::stats::stats,
+            ipc::chat::chat_list,
+            ipc::chat::chat_connect,
+            ipc::chat::chat_disconnect,
+            ipc::chat::chat_send,
+            ipc::chat::chat_history,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

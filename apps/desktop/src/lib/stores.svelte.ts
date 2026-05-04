@@ -3,6 +3,8 @@
 
 import type {
   Category,
+  ChatMessage,
+  ChatServerDto,
   IdentityDto,
   Language,
   PoolDto,
@@ -40,9 +42,14 @@ interface AppState {
   filtersOpen: boolean;
   paletteOpen: boolean;
 
-  view: "browse" | "settings";
+  view: "browse" | "settings" | "chat";
   syncing: boolean;
   toast: string | null;
+
+  // Chat
+  chatServers: ChatServerDto[];
+  chatMessages: Record<string, ChatMessage[]>;
+  chatActiveServerId: string | null;
 }
 
 export const app = $state<AppState>({
@@ -70,6 +77,9 @@ export const app = $state<AppState>({
   view: "browse",
   syncing: false,
   toast: null,
+  chatServers: [],
+  chatMessages: {},
+  chatActiveServerId: null,
 });
 
 export function resetFilters(): void {

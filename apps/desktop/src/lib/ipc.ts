@@ -1,7 +1,11 @@
 // Thin wrappers around Tauri's `invoke` for type-safe IPC.
 
 import { invoke } from "@tauri-apps/api/core";
+import { listen, type UnlistenFn } from "@tauri-apps/api/event";
 import type {
+  ChatEventDto,
+  ChatMessage,
+  ChatServerDto,
   IdentityDto,
   PoolDto,
   SearchHitDto,
@@ -79,4 +83,33 @@ export const ipc = {
   async stats(): Promise<StatsDto> {
     return invoke("stats");
   },
+  async chatList(): Promise<ChatServerDto[]> {
+    return invoke("chat_list");
+  },
+  async chatConnect(url: string): Promise<ChatServerDto> {
+    return invoke("chat_connect", { url });
+  },
+  async chatDisconnect(serverId: string): Promise<void> {
+    return invoke("chat_disconnect", { serverId });
+  },
+  async chatSend(
+    serverId: string,
+    channel: string,
+    content: string,
+  ): Promise<ChatMessage> {
+    return invoke("chat_send", { serverId, channel, content });
+  },
+  async chatHistory(
+    serverId: string,
+    channel: string,
+    limit: number | null,
+  ): Promise<void> {
+    return invoke("chat_history", { serverId, channel, limit });
+  },
 };
+
+export async function onChatEvent(
+  cb: (e: ChatEventDto) => void,
+): Promise<UnlistenFn> {
+  return listen<ChatEventDto>("chat-event", (event) => cb(event.payload));
+}

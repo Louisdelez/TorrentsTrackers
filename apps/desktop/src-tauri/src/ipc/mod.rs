@@ -2,6 +2,7 @@
 //! converting Rust domain types to JSON-friendly DTOs the Svelte frontend
 //! consumes.
 
+pub mod chat;
 pub mod dto;
 pub mod identity;
 pub mod magnet;
