@@ -9,9 +9,43 @@
     Layers,
     Plus,
     AlertOctagon,
+    Loader2,
+    PackageCheck,
   } from "lucide-svelte";
   import { ipc } from "$lib/ipc";
   import { app, showToast } from "$lib/stores.svelte";
+  import { checkForUpdate, installAndRestart, type UpdateCheckResult } from "$lib/updater";
+
+  const APP_VERSION = "0.2.0";
+
+  let update = $state<UpdateCheckResult | null>(null);
+  let updateChecking = $state(false);
+  let updateInstalling = $state(false);
+
+  async function checkUpdate() {
+    updateChecking = true;
+    try {
+      update = await checkForUpdate(APP_VERSION);
+      if (update.kind === "up_to_date") {
+        showToast(`À jour (${update.current})`);
+      }
+    } finally {
+      updateChecking = false;
+    }
+  }
+
+  async function applyUpdate() {
+    if (!update || update.kind !== "available") return;
+    if (!confirm(`Installer la v${update.next} et redémarrer ?`)) return;
+    updateInstalling = true;
+    try {
+      await installAndRestart(update.handle);
+    } catch (e) {
+      showToast(`Échec installation: ${e}`);
+    } finally {
+      updateInstalling = false;
+    }
+  }
 
   let {
     onExportIdentity,
@@ -223,6 +257,61 @@
           {/each}
         </ul>
       {/if}
+    </section>
+
+    <!-- Updates -->
+    <section class="bg-elevated border-border mb-6 rounded-xl border p-5">
+      <div class="mb-3 flex items-center justify-between">
+        <h2 class="text-primary text-sm font-medium">Mises à jour</h2>
+        <span class="text-muted text-xs">version actuelle&nbsp;: <code class="font-mono">{APP_VERSION}</code></span>
+      </div>
+
+      {#if update?.kind === "available"}
+        <div class="bg-base mb-3 rounded-lg p-3 text-sm">
+          <div class="text-primary inline-flex items-center gap-2 font-medium">
+            <PackageCheck size={14} class="text-success" />
+            v{update.next} disponible
+          </div>
+          {#if update.notes}
+            <p class="text-secondary mt-1.5 text-xs whitespace-pre-wrap">{update.notes}</p>
+          {/if}
+        </div>
+      {:else if update?.kind === "up_to_date"}
+        <p class="text-muted mb-3 text-xs">À jour ({update.current}).</p>
+      {:else if update?.kind === "error"}
+        <p class="text-danger mb-3 text-xs">Erreur : {update.message}</p>
+      {/if}
+
+      <div class="flex flex-wrap gap-2">
+        <button
+          type="button"
+          class="btn-secondary"
+          disabled={updateChecking}
+          onclick={checkUpdate}
+        >
+          {#if updateChecking}
+            <Loader2 size={13} class="animate-spin" />
+          {:else}
+            <RefreshCw size={13} />
+          {/if}
+          Vérifier
+        </button>
+        {#if update?.kind === "available"}
+          <button
+            type="button"
+            class="btn-secondary"
+            disabled={updateInstalling}
+            onclick={applyUpdate}
+          >
+            {#if updateInstalling}
+              <Loader2 size={13} class="animate-spin" />
+            {:else}
+              <Download size={13} />
+            {/if}
+            Installer & redémarrer
+          </button>
+        {/if}
+      </div>
     </section>
 
     <!-- Stats -->

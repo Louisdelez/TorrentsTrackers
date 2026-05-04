@@ -1966,7 +1966,7 @@ dependencies = [
 
 [[package]]
 name = "tt-chat"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -1988,7 +1988,7 @@ dependencies = [
 
 [[package]]
 name = "tt-chat-server"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "axum",
@@ -2014,7 +2014,7 @@ dependencies = [
 
 [[package]]
 name = "tt-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "async-trait",
  "blake3",
@@ -2031,7 +2031,7 @@ dependencies = [
 
 [[package]]
 name = "tt-identity"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aes-gcm",
  "bech32",

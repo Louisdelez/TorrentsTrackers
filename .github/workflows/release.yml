@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag name (e.g. v0.1.0). Will create the release if absent."
+        description: "Tag name (e.g. v0.2.0). Will create the release if absent."
         required: true
 
 permissions:
@@ -23,19 +23,29 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
+            updater_platform: linux-x86_64
             artefact_glob: |
               apps/desktop/src-tauri/target/release/bundle/deb/*.deb
               apps/desktop/src-tauri/target/release/bundle/rpm/*.rpm
               apps/desktop/src-tauri/target/release/bundle/appimage/*.AppImage
+              apps/desktop/src-tauri/target/release/bundle/appimage/*.AppImage.sig
           - os: macos-14
+            updater_platform: darwin-aarch64
             artefact_glob: |
               apps/desktop/src-tauri/target/release/bundle/dmg/*.dmg
               apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz
+              apps/desktop/src-tauri/target/release/bundle/macos/*.app.tar.gz.sig
           - os: windows-latest
+            updater_platform: windows-x86_64
             artefact_glob: |
               apps/desktop/src-tauri/target/release/bundle/msi/*.msi
+              apps/desktop/src-tauri/target/release/bundle/msi/*.msi.sig
               apps/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+              apps/desktop/src-tauri/target/release/bundle/nsis/*-setup.exe.sig
     runs-on: ${{ matrix.os }}
+    env:
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -72,11 +82,11 @@ jobs:
         working-directory: apps/desktop
         run: pnpm install --frozen-lockfile
 
-      - name: Tauri build
+      - name: Tauri build (signed)
         working-directory: apps/desktop
         run: pnpm tauri build
 
-      - name: Upload to release
+      - name: Upload bundles to release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag || github.ref_name }}
@@ -134,3 +144,91 @@ jobs:
           files: artefacts/*
           fail_on_unmatched_files: false
           generate_release_notes: true
+
+  updater-manifest:
+    name: Generate latest.json
+    needs: [desktop-bundles]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve tag
+        id: tag
+        run: |
+          TAG="${{ github.event.inputs.tag || github.ref_name }}"
+          VERSION="${TAG#v}"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Download .sig files from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p sigs
+          gh release download "${{ steps.tag.outputs.tag }}" \
+            --repo "${{ github.repository }}" \
+            --pattern "*.sig" \
+            --dir sigs/ || echo "no sig files yet"
+          ls -la sigs/
+
+      - name: Build latest.json
+        id: manifest
+        env:
+          REPO: ${{ github.repository }}
+          TAG: ${{ steps.tag.outputs.tag }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          set -e
+          PUB_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          NOTES=$(printf "TorrentsTrackers %s\n\nSee CHANGELOG.md for details." "$VERSION")
+
+          read_sig() {
+            local pattern="$1"
+            local f
+            f=$(ls sigs/$pattern 2>/dev/null | head -1)
+            if [ -n "$f" ] && [ -f "$f" ]; then
+              cat "$f"
+            else
+              echo ""
+            fi
+          }
+
+          LINUX_SIG=$(read_sig "*amd64.AppImage.sig")
+          MAC_SIG=$(read_sig "*.app.tar.gz.sig")
+          WIN_SIG=$(read_sig "*-setup.exe.sig")
+          if [ -z "$WIN_SIG" ]; then
+            WIN_SIG=$(read_sig "*.msi.sig")
+          fi
+
+          BASE="https://github.com/${REPO}/releases/download/${TAG}"
+
+          jq -n \
+            --arg version  "$VERSION" \
+            --arg pub_date "$PUB_DATE" \
+            --arg notes    "$NOTES" \
+            --arg linux_url "${BASE}/TorrentsTrackers_${VERSION}_amd64.AppImage" \
+            --arg linux_sig "$LINUX_SIG" \
+            --arg mac_url   "${BASE}/TorrentsTrackers_${VERSION}_aarch64.app.tar.gz" \
+            --arg mac_sig   "$MAC_SIG" \
+            --arg win_url   "${BASE}/TorrentsTrackers_${VERSION}_x64-setup.exe" \
+            --arg win_sig   "$WIN_SIG" \
+            '{
+              version: $version,
+              pub_date: $pub_date,
+              notes: $notes,
+              platforms: (
+                {} +
+                ( if $linux_sig != "" then { "linux-x86_64": { signature: $linux_sig, url: $linux_url } } else {} end ) +
+                ( if $mac_sig   != "" then { "darwin-aarch64": { signature: $mac_sig, url: $mac_url } } else {} end ) +
+                ( if $win_sig   != "" then { "windows-x86_64": { signature: $win_sig, url: $win_url } } else {} end )
+              )
+            }' > latest.json
+
+          cat latest.json
+
+      - name: Upload latest.json to the release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          files: latest.json
+          fail_on_unmatched_files: true

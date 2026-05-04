@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "TorrentsTrackers",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "identifier": "ch.delez.torrents-trackers",
   "build": {
     "beforeDevCommand": "pnpm dev",
@@ -30,9 +30,10 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "category": "Utility",
     "shortDescription": "Federated, local-first torrent discovery and chat.",
-    "longDescription": "TorrentsTrackers is a desktop client that aggregates community-curated torrent catalogs from any backend (local folder, HTTP/raw URL, Git repository) and lets you discover, filter and launch magnets in your existing torrent client. Includes a built-in WebSocket chat for connecting to community-hosted servers, signed end-to-end with ed25519. No website, no domain, no central index.",
+    "longDescription": "TorrentsTrackers is a desktop client that aggregates community-curated torrent catalogs from any backend (local folder, HTTP/raw URL, Git repository) and lets you discover, filter and launch magnets in your existing torrent client. Includes a built-in WebSocket chat for connecting to community-hosted servers (signed end-to-end with ed25519) and a built-in BitTorrent download manager via librqbit. No website, no domain, no central index.",
     "publisher": "Louis Delez",
     "homepage": "https://github.com/loicdelez/TorrentsTrackers",
     "icon": [
@@ -46,6 +47,15 @@
       "deb": {
         "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]
       }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/loicdelez/TorrentsTrackers/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE3QjhFM0Q1OUJENTAwQzUKUldURkFOV2IxZU80RjhxU212M3Y1M25qN1c3ZkEvRExodFFjVnBIQy9MOEoxUkRMY2xEdXJ4SE0K"
     }
   }
 }

@@ -3147,7 +3147,7 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "tt-chat"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -3170,7 +3170,7 @@ dependencies = [
 
 [[package]]
 name = "tt-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3191,7 +3191,7 @@ dependencies = [
 
 [[package]]
 name = "tt-core"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "async-trait",
  "blake3",
@@ -3208,7 +3208,7 @@ dependencies = [
 
 [[package]]
 name = "tt-downloads"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3222,7 +3222,7 @@ dependencies = [
 
 [[package]]
 name = "tt-identity"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "aes-gcm",
  "bech32",
@@ -3244,7 +3244,7 @@ dependencies = [
 
 [[package]]
 name = "tt-sources"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "async-trait",
  "chrono",
@@ -3263,7 +3263,7 @@ dependencies = [
 
 [[package]]
 name = "tt-storage"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "dirs",

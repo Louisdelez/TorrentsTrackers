@@ -46,6 +46,9 @@ keys/
 *.pem
 secret.*
 
+# Tauri updater private key (NEVER commit). Public part .pub is committed.
+apps/desktop/.tauri/*.key
+
 # Logs
 *.log
 logs/

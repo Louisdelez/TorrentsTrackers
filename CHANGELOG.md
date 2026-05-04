@@ -8,6 +8,45 @@ starting at `1.0.0`.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-04
+
+Two short cycles after 0.1.0 worth of fixes and feature work.
+
+### Fixed
+- **Chat events were not reaching the desktop UI in 0.1.0.** Phase 4
+  shipped the IPC backend and the `ChatView` component, but the
+  `App.svelte` event listener and view branch had silently failed to
+  apply during the commit. Live messages never made it to the store.
+  Restored end-to-end and verified with the bundled `chat_smoke`.
+
+### Added
+- **Reply threads** in chat, end to end (`ChatMessage.reply_to`,
+  `chat_send` IPC param, hover-Reply button + composer banner +
+  threaded rendering with scroll-to-parent).
+- **Native desktop notifications** via `tauri-plugin-notification` —
+  fired on incoming chat messages when window unfocused and the
+  message isn't from the local identity.
+- **In-app BitTorrent downloads** via `librqbit`:
+  - new `tt-downloads` workspace crate (DownloadManager API),
+  - five IPC commands wrapping it,
+  - `DownloadsView` Svelte component (progress bars, ↓/↑ rates,
+    pause/resume/remove, polling 1.5 s),
+  - Header download toggle button.
+- **Auto-update** via `tauri-plugin-updater`:
+  - updater section in `tauri.conf.json` pointing at
+    `releases/latest/download/latest.json`, embedded ed25519 public
+    key,
+  - "Mises à jour" section in Settings (Vérifier / Installer & redémarrer),
+  - extended `release.yml`: `TAURI_SIGNING_PRIVATE_KEY` plumbed in,
+    `createUpdaterArtifacts: true`, plus a final `updater-manifest`
+    job that downloads the just-uploaded `.sig` files and assembles
+    `latest.json`.
+
+### Changed
+- All Cargo / package.json / tauri.conf.json versions bumped to 0.2.0.
+- serde gained the `rc` feature in workspace deps so librqbit's
+  `Option<Arc<str>>` Deserialize impl resolves.
+
 ## [0.1.0] — 2026-05-04
 
 First public alpha. Everything ships as a single workspace plus two app
@@ -109,5 +148,6 @@ target so far; macOS and Windows are wired up in CI but unverified.
 - `.github/workflows/release.yml` — Tauri bundles + CLI + chat-server
   binaries on `v*` tags, uploaded to the GitHub Release.
 
-[Unreleased]: https://github.com/loicdelez/TorrentsTrackers/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/loicdelez/TorrentsTrackers/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/loicdelez/TorrentsTrackers/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/loicdelez/TorrentsTrackers/releases/tag/v0.1.0
