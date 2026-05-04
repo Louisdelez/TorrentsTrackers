@@ -22,7 +22,11 @@ use crate::config::Config;
 use crate::state::AppState;
 
 #[derive(Parser)]
-#[command(name = "tt-chat-server", version, about = "TorrentsTrackers chat server")]
+#[command(
+    name = "tt-chat-server",
+    version,
+    about = "TorrentsTrackers chat server"
+)]
 struct Cli {
     /// Path to the TOML config file. Defaults to `./tt-chat-server.toml`.
     #[arg(long, short, default_value = "tt-chat-server.toml")]
@@ -51,8 +55,12 @@ async fn main() -> anyhow::Result<()> {
 
     let cfg = Config::load(&cli.config)
         .with_context(|| format!("loading config from {}", cli.config.display()))?;
-    tracing::info!("config: bind={}, server_name='{}', db={}",
-        cfg.bind, cfg.server_name, cfg.db_path.display());
+    tracing::info!(
+        "config: bind={}, server_name='{}', db={}",
+        cfg.bind,
+        cfg.server_name,
+        cfg.db_path.display()
+    );
 
     let db = db::Database::open(&cfg.db_path).context("open database")?;
     db.migrate().context("migrate database")?;

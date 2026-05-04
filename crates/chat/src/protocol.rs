@@ -45,7 +45,9 @@ pub struct ChatMessage {
 pub enum ServerMessage {
     /// First message after handshake. The client must reply with a [`Hello`]
     /// signing this nonce.
-    AuthChallenge { nonce_hex: String },
+    AuthChallenge {
+        nonce_hex: String,
+    },
     AuthAccepted {
         server_id: String,
         server_name: String,

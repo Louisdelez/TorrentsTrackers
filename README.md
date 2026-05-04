@@ -3,7 +3,7 @@
 > Découverte de torrents fédérée, locale et sans site web.
 > Une app desktop qui remplace Pirate Bay, YGG, 1337x — en branchant des sources que tu choisis.
 
-**Status :** alpha — en cours de spec et d'implémentation.
+**Status :** alpha (`v0.1.0`) — feature-complete on the planned scope; awaiting community testing.
 **License :** MIT
 **Stack :** Rust · Tauri 2 · Svelte 5 · SQLite
 
@@ -104,33 +104,39 @@ TorrentsTrackers/
 └── docs/             specs détaillées
 ```
 
-## Quickstart
+## Install
 
-> Pas encore disponible — la phase 1 (CLI MVP) est en cours.
+Pre-built bundles are produced by CI on every `v*` tag and uploaded to
+the [GitHub Releases](https://github.com/loicdelez/TorrentsTrackers/releases)
+page.
 
-Le futur quickstart ressemblera à :
+| Platform | Artefact | Size |
+|---|---|---|
+| Debian / Ubuntu | `TorrentsTrackers_<v>_amd64.deb` | ~5 MB |
+| Fedora / RHEL | `TorrentsTrackers-<v>-1.x86_64.rpm` | ~5 MB |
+| Linux (any) | `TorrentsTrackers_<v>_amd64.AppImage` | ~76 MB |
+| macOS | `TorrentsTrackers_<v>_aarch64.dmg` | TBA |
+| Windows | `TorrentsTrackers_<v>_x64-setup.exe` | TBA |
 
-```sh
-# Lancer le CLI sur une liste locale
-tt search naruto --in ~/MesListes/anime-fr.json
+The CLI (`tt`) and the chat server (`tt-chat-server`) ship as separate
+single-file binaries (also on the release page).
 
-# Pull une source distante et chercher dedans
-tt source add github https://github.com/anime-fr/list-vf
-tt search naruto --category anime --quality 1080p
-```
+See [docs/quickstart.md](./docs/quickstart.md) for the full first-run
+walkthrough.
 
 ## Roadmap
 
-Voir [ROADMAP.md](./ROADMAP.md) pour les phases détaillées.
+Voir [ROADMAP.md](./ROADMAP.md) et [CHANGELOG.md](./CHANGELOG.md).
 
 | Phase | Statut |
 |---|---|
-| 0 — Spec & skeleton | en cours |
-| 1 — Core + CLI MVP | à venir |
-| 2 — Identité + sources avancées | à venir |
-| 3 — Tauri desktop UI | à venir |
-| 4 — Chat & messagerie | à venir |
-| 5 — Polish & release | à venir |
+| 0 — Spec & skeleton | done |
+| 1 — Core + CLI MVP | done |
+| 2 — Identité + sources avancées | done |
+| 3 — Tauri desktop UI | done |
+| 3-bis — Polish UI (palette, filtres, publish) | done |
+| 4 — Chat & messagerie | done |
+| 5 — Polish & release | done — 0.1.0 |
 
 ## Contribuer
 

@@ -2,7 +2,7 @@
 
 Plan de livraison phasé. Chaque phase a un livrable concret et une *Definition of Done* (DoD).
 
-## Phase 0 — Spec & Skeleton (en cours)
+## Phase 0 — Spec & Skeleton (done)
 
 **Objectif :** poser les fondations textuelles et techniques. Aligner la vision pour éviter les divergences ultérieures.
 
@@ -21,7 +21,7 @@ Plan de livraison phasé. Chaque phase a un livrable concret et une *Definition 
 
 ---
 
-## Phase 1 — Core + CLI MVP
+## Phase 1 — Core + CLI MVP (done)
 
 **Objectif :** valider le modèle de données et les flux essentiels avec un CLI utilisable de bout en bout.
 
@@ -50,7 +50,7 @@ Plan de livraison phasé. Chaque phase a un livrable concret et une *Definition 
 
 ---
 
-## Phase 2 — Identité + sources avancées
+## Phase 2 — Identité + sources avancées (done)
 
 **Objectif :** introduire l'identité cryptographique et les sources distantes plus complexes.
 
@@ -78,7 +78,7 @@ Plan de livraison phasé. Chaque phase a un livrable concret et une *Definition 
 
 ---
 
-## Phase 3 — Tauri Desktop UI
+## Phase 3 — Tauri Desktop UI (done, polished in 3-bis)
 
 **Objectif :** rendre l'app accessible aux non-CLI. Implémenter le design moderne défini dans `docs/ui-design.md`.
 
@@ -99,7 +99,7 @@ Plan de livraison phasé. Chaque phase a un livrable concret et une *Definition 
 
 ---
 
-## Phase 4 — Chat & messagerie
+## Phase 4 — Chat & messagerie (done)
 
 **Objectif :** ajouter le canal de communication communautaire.
 
@@ -124,7 +124,7 @@ Plan de livraison phasé. Chaque phase a un livrable concret et une *Definition 
 
 ---
 
-## Phase 5 — Polish & release
+## Phase 5 — Polish & release (done — v0.1.0)
 
 **Objectif :** stabiliser, documenter, distribuer.
 

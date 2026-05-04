@@ -28,8 +28,24 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
     "targets": "all",
-    "icon": []
+    "category": "Utility",
+    "shortDescription": "Federated, local-first torrent discovery and chat.",
+    "longDescription": "TorrentsTrackers is a desktop client that aggregates community-curated torrent catalogs from any backend (local folder, HTTP/raw URL, Git repository) and lets you discover, filter and launch magnets in your existing torrent client. Includes a built-in WebSocket chat for connecting to community-hosted servers, signed end-to-end with ed25519. No website, no domain, no central index.",
+    "publisher": "Louis Delez",
+    "homepage": "https://github.com/loicdelez/TorrentsTrackers",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "linux": {
+      "deb": {
+        "depends": ["libwebkit2gtk-4.1-0", "libgtk-3-0"]
+      }
+    }
   }
 }

@@ -15,9 +15,7 @@ use uuid::Uuid;
 
 use crate::connection::{self, WsStream};
 use crate::error::{ChatError, Result};
-use crate::protocol::{
-    ChatMessage, ClientMessage, ServerMessage, auth_payload, message_payload,
-};
+use crate::protocol::{ChatMessage, ClientMessage, ServerMessage, auth_payload, message_payload};
 
 /// Events surfaced to the consumer of [`ChatClient`].
 #[derive(Debug, Clone)]
@@ -64,8 +62,8 @@ impl ChatClient {
                 )));
             }
         };
-        let nonce_bytes = hex::decode(&challenge)
-            .map_err(|e| ChatError::Protocol(format!("nonce hex: {e}")))?;
+        let nonce_bytes =
+            hex::decode(&challenge).map_err(|e| ChatError::Protocol(format!("nonce hex: {e}")))?;
         let payload = auth_payload(&nonce_bytes);
         let signature: Signature = keypair.sign(&payload);
         let pubkey_hex = hex::encode(keypair.public_bytes().0);

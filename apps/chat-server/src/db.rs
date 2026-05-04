@@ -102,7 +102,11 @@ impl Database {
         let rows = stmt.query_map(params_slice.as_slice(), |row| {
             let id_s: String = row.get(0)?;
             let id = uuid::Uuid::parse_str(&id_s).map_err(|e| {
-                rusqlite::Error::FromSqlConversionFailure(0, rusqlite::types::Type::Text, Box::new(e))
+                rusqlite::Error::FromSqlConversionFailure(
+                    0,
+                    rusqlite::types::Type::Text,
+                    Box::new(e),
+                )
             })?;
             let reply: Option<String> = row.get(4)?;
             let reply_to = reply
