@@ -16,10 +16,11 @@ pub fn normalize_title(title: &str) -> String {
             out.push(c);
             last_was_space = false;
         } else if (c.is_whitespace() || matches!(c, '.' | '_' | '-' | '[' | ']' | '(' | ')'))
-            && !last_was_space {
-                out.push(' ');
-                last_was_space = true;
-            }
+            && !last_was_space
+        {
+            out.push(' ');
+            last_was_space = true;
+        }
         // Other punctuation is dropped entirely.
     }
     out.trim().to_string()

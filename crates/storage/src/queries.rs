@@ -3,8 +3,9 @@
 use chrono::{DateTime, Utc};
 use rusqlite::{OptionalExtension, params};
 use tt_core::{
-    Category, ContentId, ContentLink, Entry, Language, Pool, PoolFilters, PoolId, PublicKeyBytes,
-    Quality, SignatureBytes, Source, SourceId, SourceKind, TrustLevel,
+    Ban, Category, ContentId, ContentLink, Entry, Language, Pool, PoolFilters, PoolId,
+    PublicKeyBytes, Quality, SignatureBytes, Source, SourceId, SourceKind, TrustLevel,
+    signing::verify_entry,
 };
 use uuid::Uuid;
 
@@ -204,7 +205,21 @@ fn trust_level_from_str(s: &str) -> Option<TrustLevel> {
 impl Database {
     /// Upsert an entry (insert if new, update if same `id`) and link it to a
     /// source. Returns `true` if the entry was newly inserted.
+    ///
+    /// Verifies the entry's ed25519 signature and rejects banned contributors
+    /// in the target source. Use [`Database::upsert_entry_unverified`] only
+    /// for tests that intentionally bypass these checks.
     pub fn upsert_entry(&self, entry: &Entry, source_id: SourceId) -> Result<bool> {
+        verify_entry(entry).map_err(|_| StorageError::InvalidSignature)?;
+        if self.is_banned(source_id, &entry.contributor_pubkey)? {
+            return Err(StorageError::Banned);
+        }
+        self.upsert_entry_unverified(entry, source_id)
+    }
+
+    /// Insert an entry without checking signature or bans. Bypasses safety —
+    /// only use for fixtures and tests.
+    pub fn upsert_entry_unverified(&self, entry: &Entry, source_id: SourceId) -> Result<bool> {
         let mut conn = self.conn.lock().unwrap();
         let tx = conn.transaction()?;
         let now = Utc::now().to_rfc3339();
@@ -731,6 +746,194 @@ impl Database {
     }
 }
 
+// --------------------------------------------------------------------------
+// Bans
+// --------------------------------------------------------------------------
+
+impl Database {
+    pub fn add_ban(
+        &self,
+        source_id: SourceId,
+        pubkey: &PublicKeyBytes,
+        reason: Option<&str>,
+        banned_by: &PublicKeyBytes,
+    ) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT INTO bans (source_id, pubkey, reason, banned_at, banned_by)
+             VALUES (?1, ?2, ?3, ?4, ?5)
+             ON CONFLICT(source_id, pubkey) DO UPDATE SET
+                reason = excluded.reason,
+                banned_at = excluded.banned_at,
+                banned_by = excluded.banned_by",
+            params![
+                source_id.0.to_string(),
+                &pubkey.0[..],
+                reason,
+                Utc::now().to_rfc3339(),
+                &banned_by.0[..],
+            ],
+        )?;
+        Ok(())
+    }
+
+    pub fn remove_ban(&self, source_id: SourceId, pubkey: &PublicKeyBytes) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "DELETE FROM bans WHERE source_id = ?1 AND pubkey = ?2",
+            params![source_id.0.to_string(), &pubkey.0[..]],
+        )?;
+        Ok(())
+    }
+
+    pub fn is_banned(&self, source_id: SourceId, pubkey: &PublicKeyBytes) -> Result<bool> {
+        let conn = self.conn.lock().unwrap();
+        let exists: i64 = conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM bans WHERE source_id = ?1 AND pubkey = ?2)",
+            params![source_id.0.to_string(), &pubkey.0[..]],
+            |r| r.get(0),
+        )?;
+        Ok(exists != 0)
+    }
+
+    pub fn list_bans(&self, source_id: SourceId) -> Result<Vec<Ban>> {
+        let conn = self.conn.lock().unwrap();
+        let mut stmt = conn.prepare(
+            "SELECT pubkey, reason, banned_at, banned_by FROM bans WHERE source_id = ?1
+             ORDER BY banned_at DESC",
+        )?;
+        let rows = stmt.query_map(params![source_id.0.to_string()], |row| {
+            let pubkey_bytes: Vec<u8> = row.get(0)?;
+            let banned_by_bytes: Vec<u8> = row.get(3)?;
+            let pubkey = bytes_to_pubkey(&pubkey_bytes, 0)?;
+            let banned_by = bytes_to_pubkey(&banned_by_bytes, 3)?;
+            let banned_at_s: String = row.get(2)?;
+            let banned_at = DateTime::parse_from_rfc3339(&banned_at_s)
+                .map_err(|e| {
+                    rusqlite::Error::FromSqlConversionFailure(
+                        2,
+                        rusqlite::types::Type::Text,
+                        Box::new(e),
+                    )
+                })?
+                .with_timezone(&Utc);
+            Ok(Ban {
+                pubkey,
+                reason: row.get::<_, Option<String>>(1)?,
+                banned_at,
+                banned_by,
+            })
+        })?;
+        rows.collect::<rusqlite::Result<Vec<_>>>()
+            .map_err(StorageError::from)
+    }
+
+    /// Replace the ban list for a source (used during sync from the upstream
+    /// `bans.jsonl` so removals propagate).
+    pub fn replace_bans(&self, source_id: SourceId, bans: &[Ban]) -> Result<()> {
+        let mut conn = self.conn.lock().unwrap();
+        let tx = conn.transaction()?;
+        tx.execute(
+            "DELETE FROM bans WHERE source_id = ?1",
+            params![source_id.0.to_string()],
+        )?;
+        for b in bans {
+            tx.execute(
+                "INSERT INTO bans (source_id, pubkey, reason, banned_at, banned_by)
+                 VALUES (?1, ?2, ?3, ?4, ?5)",
+                params![
+                    source_id.0.to_string(),
+                    &b.pubkey.0[..],
+                    b.reason,
+                    b.banned_at.to_rfc3339(),
+                    &b.banned_by.0[..],
+                ],
+            )?;
+        }
+        tx.commit()?;
+        Ok(())
+    }
+}
+
+fn bytes_to_pubkey(b: &[u8], col: usize) -> rusqlite::Result<PublicKeyBytes> {
+    if b.len() != 32 {
+        return Err(rusqlite::Error::FromSqlConversionFailure(
+            col,
+            rusqlite::types::Type::Blob,
+            "pubkey wrong size".into(),
+        ));
+    }
+    let mut arr = [0u8; 32];
+    arr.copy_from_slice(b);
+    Ok(PublicKeyBytes(arr))
+}
+
+// --------------------------------------------------------------------------
+// Local identity
+// --------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+pub struct LocalIdentity {
+    pub pubkey: PublicKeyBytes,
+    pub display_name: Option<String>,
+    pub created_at: DateTime<Utc>,
+}
+
+impl Database {
+    pub fn put_local_identity(
+        &self,
+        pubkey: &PublicKeyBytes,
+        display_name: Option<&str>,
+    ) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute(
+            "INSERT INTO identity (key, pubkey, display_name, created_at)
+             VALUES ('self', ?1, ?2, ?3)
+             ON CONFLICT(key) DO UPDATE SET
+                pubkey = excluded.pubkey,
+                display_name = excluded.display_name",
+            params![&pubkey.0[..], display_name, Utc::now().to_rfc3339()],
+        )?;
+        Ok(())
+    }
+
+    pub fn get_local_identity(&self) -> Result<Option<LocalIdentity>> {
+        let conn = self.conn.lock().unwrap();
+        let row = conn
+            .query_row(
+                "SELECT pubkey, display_name, created_at FROM identity WHERE key = 'self'",
+                [],
+                |row| {
+                    let pubkey_bytes: Vec<u8> = row.get(0)?;
+                    let pubkey = bytes_to_pubkey(&pubkey_bytes, 0)?;
+                    let created_at_s: String = row.get(2)?;
+                    let created_at = DateTime::parse_from_rfc3339(&created_at_s)
+                        .map_err(|e| {
+                            rusqlite::Error::FromSqlConversionFailure(
+                                2,
+                                rusqlite::types::Type::Text,
+                                Box::new(e),
+                            )
+                        })?
+                        .with_timezone(&Utc);
+                    Ok(LocalIdentity {
+                        pubkey,
+                        display_name: row.get::<_, Option<String>>(1)?,
+                        created_at,
+                    })
+                },
+            )
+            .optional()?;
+        Ok(row)
+    }
+
+    pub fn clear_local_identity(&self) -> Result<()> {
+        let conn = self.conn.lock().unwrap();
+        conn.execute("DELETE FROM identity WHERE key = 'self'", [])?;
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
@@ -800,8 +1003,8 @@ mod tests {
         db.insert_source(&s).unwrap();
         let e1 = make_entry(s.id, "Inception 1080p");
         let e2 = make_entry(s.id, "Inception 1080p");
-        assert!(db.upsert_entry(&e1, s.id).unwrap()); // new
-        assert!(!db.upsert_entry(&e2, s.id).unwrap()); // dup, but updates
+        assert!(db.upsert_entry_unverified(&e1, s.id).unwrap()); // new
+        assert!(!db.upsert_entry_unverified(&e2, s.id).unwrap()); // dup, but updates
         assert_eq!(db.count_entries().unwrap(), 1);
     }
 
@@ -810,9 +1013,9 @@ mod tests {
         let db = Database::open_in_memory().unwrap();
         let s = make_source();
         db.insert_source(&s).unwrap();
-        db.upsert_entry(&make_entry(s.id, "Inception 1080p VOSTFR"), s.id)
+        db.upsert_entry_unverified(&make_entry(s.id, "Inception 1080p VOSTFR"), s.id)
             .unwrap();
-        db.upsert_entry(&make_entry(s.id, "The Dark Knight 1080p"), s.id)
+        db.upsert_entry_unverified(&make_entry(s.id, "The Dark Knight 1080p"), s.id)
             .unwrap();
 
         let q = SearchQuery {
@@ -825,6 +1028,34 @@ mod tests {
     }
 
     #[test]
+    fn bans_roundtrip() {
+        let db = Database::open_in_memory().unwrap();
+        let s = make_source();
+        db.insert_source(&s).unwrap();
+        let pk = PublicKeyBytes([5; 32]);
+        let by = PublicKeyBytes([6; 32]);
+        assert!(!db.is_banned(s.id, &pk).unwrap());
+        db.add_ban(s.id, &pk, Some("spam"), &by).unwrap();
+        assert!(db.is_banned(s.id, &pk).unwrap());
+        assert_eq!(db.list_bans(s.id).unwrap().len(), 1);
+        db.remove_ban(s.id, &pk).unwrap();
+        assert!(!db.is_banned(s.id, &pk).unwrap());
+    }
+
+    #[test]
+    fn local_identity_roundtrip() {
+        let db = Database::open_in_memory().unwrap();
+        assert!(db.get_local_identity().unwrap().is_none());
+        let pk = PublicKeyBytes([3; 32]);
+        db.put_local_identity(&pk, Some("Test User")).unwrap();
+        let got = db.get_local_identity().unwrap().unwrap();
+        assert_eq!(got.pubkey.0, pk.0);
+        assert_eq!(got.display_name.as_deref(), Some("Test User"));
+        db.clear_local_identity().unwrap();
+        assert!(db.get_local_identity().unwrap().is_none());
+    }
+
+    #[test]
     fn search_filters_by_category() {
         let db = Database::open_in_memory().unwrap();
         let s = make_source();
@@ -832,7 +1063,7 @@ mod tests {
         let mut e = make_entry(s.id, "Some Series E01");
         e.category = Category::Series;
         e.id = ContentId::compute(&e.link, &e.title).unwrap();
-        db.upsert_entry(&e, s.id).unwrap();
+        db.upsert_entry_unverified(&e, s.id).unwrap();
 
         let q = SearchQuery {
             categories: Some(vec![Category::Films]),

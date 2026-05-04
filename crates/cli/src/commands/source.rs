@@ -2,6 +2,7 @@ use anyhow::{Context, Result, anyhow, bail};
 use chrono::Utc;
 use clap::{Args, Subcommand};
 use tt_core::{Source, SourceAdapter, SourceId, SourceKind, SyncPolicy, SyncStatus, TrustLevel};
+use tt_sources::git::GitRepo;
 use tt_sources::http::HttpUrl;
 use tt_sources::local::LocalFolder;
 use tt_storage::Database;
@@ -55,7 +56,8 @@ fn add(args: AddArgs, db: &Database) -> Result<()> {
     let kind = match args.kind.to_ascii_lowercase().as_str() {
         "local" | "localfolder" => SourceKind::LocalFolder,
         "http" | "httpurl" | "url" => SourceKind::HttpUrl,
-        other => bail!("unknown kind '{other}'. Phase 1 supports: local, http (more in Phase 2)."),
+        "git" | "gitrepo" => SourceKind::GitRepo,
+        other => bail!("unknown kind '{other}'. Phase 2 supports: local, http, git."),
     };
 
     let display_name = args
@@ -204,7 +206,12 @@ pub fn make_adapter(s: &Source) -> Result<Box<dyn SourceAdapter>> {
         SourceKind::HttpUrl => Box::new(
             HttpUrl::new(s.endpoint.clone()).map_err(|e| anyhow!("invalid http source: {e}"))?,
         ),
-        other => bail!("source kind {other:?} not implemented in Phase 1"),
+        SourceKind::GitRepo => {
+            let cache = tt_sources::git::default_cache_path(&s.id)
+                .map_err(|e| anyhow!("could not derive git cache path: {e}"))?;
+            Box::new(GitRepo::new(s.endpoint.clone(), cache))
+        }
+        other => bail!("source kind {other:?} not implemented yet"),
     })
 }
 

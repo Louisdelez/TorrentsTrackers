@@ -19,6 +19,12 @@ pub enum StorageError {
 
     #[error("invalid value: {0}")]
     Invalid(String),
+
+    #[error("invalid signature")]
+    InvalidSignature,
+
+    #[error("contributor is banned in this source")]
+    Banned,
 }
 
 pub type Result<T> = std::result::Result<T, StorageError>;

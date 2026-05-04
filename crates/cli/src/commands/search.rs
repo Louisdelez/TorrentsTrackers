@@ -188,6 +188,16 @@ fn parse_scope(s: Option<&str>, db: &Database) -> Result<SearchScope> {
     }
 }
 
+pub fn parse_category_str(s: &str) -> Result<Category> {
+    parse_category(s)
+}
+pub fn parse_quality_str(s: &str) -> Result<Quality> {
+    parse_quality(s)
+}
+pub fn parse_language_str(s: &str) -> Result<Language> {
+    parse_language(s)
+}
+
 fn parse_category(s: &str) -> Result<Category> {
     Ok(match s.to_ascii_lowercase().as_str() {
         "films" | "movies" | "film" | "movie" => Category::Films,

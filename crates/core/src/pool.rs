@@ -40,10 +40,11 @@ pub enum DedupStrategy {
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub enum ConflictStrategy {
-    KeepAll { merge_metadata: bool },
+    KeepAll {
+        merge_metadata: bool,
+    },
     PreferSource(SourceId),
     PreferNewest,
     #[default]
     PreferMostSeeded,
 }
-

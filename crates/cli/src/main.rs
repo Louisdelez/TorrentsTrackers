@@ -44,6 +44,17 @@ enum Command {
     /// Open an entry's magnet in the system torrent client.
     Open(commands::open::OpenArgs),
 
+    /// Manage the local cryptographic identity (ed25519 keypair).
+    #[command(subcommand)]
+    Identity(commands::identity::IdentityCmd),
+
+    /// Sign and publish a magnet to a writable source.
+    Publish(commands::publish::PublishArgs),
+
+    /// Manage per-source ban lists (pubkey blacklists).
+    #[command(subcommand)]
+    Ban(commands::ban::BanCmd),
+
     /// Show app paths and database stats.
     Info,
 }
@@ -82,6 +93,9 @@ async fn run() -> Result<()> {
         Command::Pool(cmd) => commands::pool::run(cmd, &db)?,
         Command::Search(args) => commands::search::run(args, &db)?,
         Command::Open(args) => commands::open::run(args, &db)?,
+        Command::Identity(cmd) => commands::identity::run(cmd, &db)?,
+        Command::Publish(args) => commands::publish::run(args, &db).await?,
+        Command::Ban(cmd) => commands::ban::run(cmd, &db)?,
         Command::Info => commands::info::run(&db_path, &db)?,
     }
 

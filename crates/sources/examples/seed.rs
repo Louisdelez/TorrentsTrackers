@@ -13,6 +13,7 @@ use tt_core::{
     Category, ContentId, ContentLink, Entry, Language, PublicKeyBytes, Quality, SignatureBytes,
     SourceAdapter, SourceId,
 };
+use tt_identity::{LocalKeypair, sign_entry};
 use tt_sources::local::LocalFolder;
 
 #[tokio::main(flavor = "current_thread")]
@@ -24,6 +25,9 @@ async fn main() {
 
     let src = LocalFolder::new(&path);
     src.ensure_layout().await.expect("ensure layout");
+
+    let keypair = LocalKeypair::generate();
+    eprintln!("seed identity: {}", keypair.npub());
 
     let source_id = SourceId::new();
     let entries = vec![
@@ -84,7 +88,11 @@ async fn main() {
         ),
     ];
 
-    for e in &entries {
+    let mut signed_entries = entries;
+    for e in &mut signed_entries {
+        sign_entry(e, &keypair);
+    }
+    for e in &signed_entries {
         src.publish_entry(e).await.expect("publish");
     }
 
@@ -107,7 +115,7 @@ async fn main() {
 
     println!(
         "seeded {} entries in {} (community.json + entries.jsonl)",
-        entries.len(),
+        signed_entries.len(),
         path.display()
     );
 }

@@ -12,6 +12,7 @@ pub mod ids;
 pub mod magnet;
 pub mod parse;
 pub mod pool;
+pub mod signing;
 pub mod source;
 
 pub use adapter::*;

@@ -11,4 +11,4 @@ pub mod queries;
 
 pub use db::Database;
 pub use error::{Result, StorageError};
-pub use queries::{SearchQuery, SearchScope};
+pub use queries::{LocalIdentity, SearchHit, SearchQuery, SearchScope};

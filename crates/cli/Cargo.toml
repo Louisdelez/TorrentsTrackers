@@ -17,6 +17,7 @@ tt-sources.workspace = true
 tt-identity.workspace = true
 tt-storage.workspace = true
 tt-chat.workspace = true
+hex.workspace = true
 tokio.workspace = true
 clap.workspace = true
 serde.workspace = true
