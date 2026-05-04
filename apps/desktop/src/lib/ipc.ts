@@ -96,8 +96,9 @@ export const ipc = {
     serverId: string,
     channel: string,
     content: string,
+    replyTo: string | null = null,
   ): Promise<ChatMessage> {
-    return invoke("chat_send", { serverId, channel, content });
+    return invoke("chat_send", { serverId, channel, content, replyTo });
   },
   async chatHistory(
     serverId: string,

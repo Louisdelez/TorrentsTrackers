@@ -126,6 +126,10 @@ body {
     background: var(--color-overlay);
     color: var(--color-primary);
   }
+  .icon-btn.active {
+    background: var(--color-overlay);
+    color: var(--color-primary);
+  }
 
   .kind-btn {
     background: var(--color-base);

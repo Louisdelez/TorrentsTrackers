@@ -11,6 +11,9 @@ importers:
       '@tauri-apps/api':
         specifier: ^2.4.0
         version: 2.11.0
+      '@tauri-apps/plugin-notification':
+        specifier: ^2.2.0
+        version: 2.3.3
       lucide-svelte:
         specifier: ^0.474.0
         version: 0.474.0(svelte@5.55.5)
@@ -550,6 +553,9 @@ packages:
     resolution: {integrity: sha512-W5Wbuqsb2pHFPTj4TaRNKTj5rwXhDShPiLSY9T18y4ouSR/NNCptAEFxFsBtyNRgL6Vs1a/q9LzfqqYzEwC+Jw==}
     engines: {node: '>= 10'}
     hasBin: true
+
+  '@tauri-apps/plugin-notification@2.3.3':
+    resolution: {integrity: sha512-Zw+ZH18RJb41G4NrfHgIuofJiymusqN+q8fGUIIV7vyCH+5sSn5coqRv/MWB9qETsUs97vmU045q7OyseCV3Qg==}
 
   '@tsconfig/svelte@5.0.8':
     resolution: {integrity: sha512-UkNnw1/oFEfecR8ypyHIQuWYdkPvHiwcQ78sh+ymIiYoF+uc5H1UBetbjyqT+vgGJ3qQN6nhucJviX6HesWtKQ==}
@@ -1172,6 +1178,10 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 2.11.0
       '@tauri-apps/cli-win32-ia32-msvc': 2.11.0
       '@tauri-apps/cli-win32-x64-msvc': 2.11.0
+
+  '@tauri-apps/plugin-notification@2.3.3':
+    dependencies:
+      '@tauri-apps/api': 2.11.0
 
   '@tsconfig/svelte@5.0.8': {}
 

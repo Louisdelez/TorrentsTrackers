@@ -45,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
     println!("subscribed to 'main'");
 
     let payload = format!("hello at {}", chrono::Utc::now().to_rfc3339());
-    let sent = client.send_text("main", &payload, &kp).await?;
+    let sent = client.send_text("main", &payload, None, &kp).await?;
     println!("sent {} (len {})", sent.id, sent.content.len());
 
     // Wait for the broadcast back to us.

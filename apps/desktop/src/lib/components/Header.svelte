@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Search, Settings, RefreshCw, User } from "lucide-svelte";
+  import { Search, Settings, RefreshCw, User, MessageSquare } from "lucide-svelte";
   import { app } from "$lib/stores.svelte";
 
   let { onSearch, onSyncAll }: { onSearch: () => void; onSyncAll: () => void } = $props();
@@ -50,6 +50,18 @@
   </div>
 
   <div class="flex items-center gap-1.5">
+    <button
+      type="button"
+      class="icon-btn"
+      class:active={app.view === "chat"}
+      title="Chat"
+      onclick={() => (app.view = app.view === "chat" ? "browse" : "chat")}
+    >
+      <MessageSquare size={16} />
+      {#if app.chatServers.length > 0}
+        <span class="text-success text-[10px]">●</span>
+      {/if}
+    </button>
     <button type="button" class="icon-btn" title="Synchroniser tout" onclick={onSyncAll}>
       <RefreshCw size={16} class={app.syncing ? "animate-spin" : ""} />
     </button>

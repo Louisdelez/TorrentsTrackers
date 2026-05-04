@@ -134,11 +134,13 @@ impl ChatClient {
             .map_err(|_| ChatError::Closed)
     }
 
-    /// Compose, sign and ship a message.
+    /// Compose, sign and ship a message. Pass `reply_to = Some(parent_id)`
+    /// to thread the message under another one.
     pub async fn send_text(
         &self,
         channel: impl Into<String>,
         content: impl Into<String>,
+        reply_to: Option<Uuid>,
         keypair: &LocalKeypair,
     ) -> Result<ChatMessage> {
         let mut m = ChatMessage {
@@ -146,7 +148,7 @@ impl ChatClient {
             channel: channel.into(),
             author_pubkey: self.pubkey_hex.clone(),
             content: content.into(),
-            reply_to: None,
+            reply_to,
             sent_at: Utc::now(),
             signature: String::new(),
         };

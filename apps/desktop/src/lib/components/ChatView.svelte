@@ -1,14 +1,24 @@
 <script lang="ts">
   import { onMount, tick } from "svelte";
-  import { Send, Plug, X, MessageSquare, Loader2 } from "lucide-svelte";
+  import { Send, Plug, X, MessageSquare, Loader2, CornerDownRight, Reply } from "lucide-svelte";
   import { ipc } from "$lib/ipc";
   import { app, showToast } from "$lib/stores.svelte";
+  import type { ChatMessage } from "$lib/types";
 
   let connectUrl = $state("ws://127.0.0.1:6970/ws");
   let dialogOpen = $state(false);
   let connecting = $state(false);
   let input = $state("");
   let scrollEl = $state<HTMLDivElement | undefined>();
+  let replyTo = $state<ChatMessage | null>(null);
+
+  function previewOf(m: ChatMessage): string {
+    return m.content.length > 60 ? m.content.slice(0, 57) + "…" : m.content;
+  }
+
+  function findParent(id: string): ChatMessage | undefined {
+    return activeMessages.find((m) => m.id === id);
+  }
 
   let activeMessages = $derived(
     app.chatActiveServerId ? (app.chatMessages[app.chatActiveServerId] ?? []) : [],
@@ -62,11 +72,16 @@
     const text = input.trim();
     if (!text || !app.chatActiveServerId) return;
     try {
-      await ipc.chatSend(app.chatActiveServerId, "main", text);
+      await ipc.chatSend(app.chatActiveServerId, "main", text, replyTo?.id ?? null);
       input = "";
+      replyTo = null;
     } catch (e) {
       showToast(`Échec envoi: ${e}`);
     }
+  }
+
+  function startReply(m: ChatMessage) {
+    replyTo = m;
   }
 
   function relTime(iso: string): string {
@@ -161,7 +176,8 @@
         </p>
       {/if}
       {#each activeMessages as m (m.id)}
-        <div class="flex gap-3 py-1.5">
+        {@const parent = m.reply_to ? findParent(m.reply_to) : undefined}
+        <div class="group flex gap-3 py-1.5" class:thread={!!parent}>
           <div class="text-secondary flex w-20 shrink-0 flex-col items-end">
             <span
               class="font-mono text-xs"
@@ -171,14 +187,79 @@
             </span>
             <span class="text-muted text-[10px]">{relTime(m.sent_at)}</span>
           </div>
-          <p class="text-primary flex-1 text-sm break-words whitespace-pre-wrap">
-            {m.content}
-          </p>
+          <div class="flex-1">
+            {#if parent}
+              <div
+                class="text-muted hover:text-secondary mb-0.5 inline-flex max-w-full cursor-pointer items-center gap-1 truncate text-[11px]"
+                onclick={() => {
+                  const el = document.querySelector(`[data-msg-id="${parent.id}"]`);
+                  el?.scrollIntoView({ block: "center", behavior: "smooth" });
+                }}
+                onkeydown={(e) => {
+                  if (e.key === "Enter") {
+                    const el = document.querySelector(`[data-msg-id="${parent.id}"]`);
+                    el?.scrollIntoView({ block: "center", behavior: "smooth" });
+                  }
+                }}
+                role="button"
+                tabindex="0"
+                title={parent.content}
+              >
+                <CornerDownRight size={11} />
+                <span style="color: {colorForPubkey(parent.author_pubkey)}">
+                  {shortPk(parent.author_pubkey)}
+                </span>
+                <span class="truncate">{previewOf(parent)}</span>
+              </div>
+            {:else if m.reply_to}
+              <div class="text-muted mb-0.5 inline-flex items-center gap-1 text-[11px]">
+                <CornerDownRight size={11} />
+                <span class="italic">message hors-scroll</span>
+              </div>
+            {/if}
+            <div class="flex items-start gap-2" data-msg-id={m.id}>
+              <p class="text-primary flex-1 text-sm break-words whitespace-pre-wrap">
+                {m.content}
+              </p>
+              <button
+                type="button"
+                class="text-muted hover:text-accent shrink-0 opacity-0 transition group-hover:opacity-100"
+                onclick={() => startReply(m)}
+                aria-label="Répondre"
+                title="Répondre"
+              >
+                <Reply size={13} />
+              </button>
+            </div>
+          </div>
         </div>
       {/each}
     </div>
 
     {#if activeServer}
+      {#if replyTo}
+        <div
+          class="border-border bg-base flex items-center gap-2 border-t px-4 py-2 text-xs"
+        >
+          <CornerDownRight size={12} class="text-muted shrink-0" />
+          <span class="text-muted">Réponse à</span>
+          <span
+            class="font-mono"
+            style="color: {colorForPubkey(replyTo.author_pubkey)}"
+          >
+            {shortPk(replyTo.author_pubkey)}
+          </span>
+          <span class="text-secondary flex-1 truncate">{previewOf(replyTo)}</span>
+          <button
+            type="button"
+            class="text-muted hover:text-primary"
+            onclick={() => (replyTo = null)}
+            aria-label="Annuler la réponse"
+          >
+            <X size={12} />
+          </button>
+        </div>
+      {/if}
       <form
         class="border-border bg-elevated/40 flex gap-2 border-t px-4 py-3"
         onsubmit={(e) => {

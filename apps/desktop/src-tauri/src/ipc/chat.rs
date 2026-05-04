@@ -165,14 +165,19 @@ pub async fn chat_send(
     server_id: String,
     channel: String,
     content: String,
+    reply_to: Option<String>,
 ) -> Result<ChatMessage, String> {
     let kp = load_keypair()?;
+    let reply_to_uuid = match reply_to {
+        Some(s) => Some(uuid::Uuid::parse_str(&s).map_err(|e| e.to_string())?),
+        None => None,
+    };
     let chats = state.chats.lock().await;
     let conn = chats
         .get(&server_id)
         .ok_or_else(|| "no such chat server".to_string())?;
     conn.client
-        .send_text(&channel, &content, &kp)
+        .send_text(&channel, &content, reply_to_uuid, &kp)
         .await
         .map_err(|e| e.to_string())
 }
