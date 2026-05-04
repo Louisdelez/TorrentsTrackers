@@ -1,0 +1,83 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/core",
+    "crates/sources",
+    "crates/identity",
+    "crates/storage",
+    "crates/chat",
+    "crates/cli",
+]
+exclude = [
+    "apps/desktop",
+    "apps/chat-server",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+license = "MIT"
+authors = ["TorrentsTrackers contributors"]
+repository = "https://github.com/loicdelez/TorrentsTrackers"
+homepage = "https://github.com/loicdelez/TorrentsTrackers"
+description = "Federated, local-first torrent discovery and chat. No website, no domain."
+readme = "../../README.md"
+keywords = ["bittorrent", "p2p", "decentralized", "federated"]
+categories = ["command-line-utilities", "network-programming"]
+
+[workspace.dependencies]
+# Internal crates
+tt-core = { path = "crates/core" }
+tt-sources = { path = "crates/sources" }
+tt-identity = { path = "crates/identity" }
+tt-storage = { path = "crates/storage" }
+tt-chat = { path = "crates/chat" }
+
+# Async runtime
+tokio = { version = "1.42", features = ["full"] }
+async-trait = "0.1"
+futures = "0.3"
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Errors
+thiserror = "2"
+anyhow = "1"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Time
+chrono = { version = "0.4", features = ["serde"] }
+
+# Crypto
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+blake3 = "1"
+rand = "0.8"
+zeroize = { version = "1", features = ["derive"] }
+bech32 = "0.11"
+
+# IDs
+uuid = { version = "1", features = ["v4", "serde"] }
+
+# HTTP
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+
+# SQLite
+rusqlite = { version = "0.32", features = ["bundled"] }
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "abort"
+
+[profile.dev]
+opt-level = 1

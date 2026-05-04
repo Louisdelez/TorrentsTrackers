@@ -1,0 +1,27 @@
+[package]
+name = "tt-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Command-line interface for TorrentsTrackers."
+
+[[bin]]
+name = "tt"
+path = "src/main.rs"
+
+[dependencies]
+tt-core.workspace = true
+tt-sources.workspace = true
+tt-identity.workspace = true
+tt-storage.workspace = true
+tt-chat.workspace = true
+tokio.workspace = true
+clap.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chrono.workspace = true

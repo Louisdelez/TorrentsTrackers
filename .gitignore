@@ -1,0 +1,53 @@
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Build artifacts
+dist/
+build/
+
+# IDE / editors
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+.DS_Store
+
+# Tauri
+apps/desktop/src-tauri/target/
+apps/desktop/dist/
+
+# Node (frontend)
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Local DB / runtime data
+*.sqlite
+*.sqlite-journal
+*.db
+*.db-journal
+data/
+runtime/
+
+# Identity (NEVER commit)
+identity.key
+keys/
+*.pem
+secret.*
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db

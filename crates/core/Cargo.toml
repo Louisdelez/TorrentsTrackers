@@ -1,0 +1,18 @@
+[package]
+name = "tt-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+description = "Core domain types and logic for TorrentsTrackers (Entry, Source, Pool, Community)."
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+chrono.workspace = true
+blake3.workspace = true
+uuid.workspace = true
+ed25519-dalek.workspace = true
+async-trait.workspace = true
