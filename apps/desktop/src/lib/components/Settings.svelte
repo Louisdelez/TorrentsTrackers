@@ -1,7 +1,29 @@
 <script lang="ts">
-  import { Copy, RefreshCw, Trash2, ArrowLeft } from "lucide-svelte";
+  import {
+    Copy,
+    RefreshCw,
+    Trash2,
+    ArrowLeft,
+    Download,
+    Upload,
+    Layers,
+    Plus,
+    AlertOctagon,
+  } from "lucide-svelte";
   import { ipc } from "$lib/ipc";
   import { app, showToast } from "$lib/stores.svelte";
+
+  let {
+    onExportIdentity,
+    onImportIdentity,
+    onCreatePool,
+    onPublish,
+  }: {
+    onExportIdentity: () => void;
+    onImportIdentity: () => void;
+    onCreatePool: () => void;
+    onPublish: () => void;
+  } = $props();
 
   async function refreshAll() {
     app.syncing = true;
@@ -13,6 +35,25 @@
     } finally {
       app.syncing = false;
     }
+  }
+
+  async function forgetIdentity() {
+    if (
+      !confirm(
+        "Effacer l'identité ? Tu ne pourras plus signer de contributions et tu ne pourras pas la récupérer si tu n'as pas de backup. Cette action est irréversible.",
+      )
+    )
+      return;
+    await ipc.identityForget();
+    app.identity = null;
+    showToast("Identité oubliée.");
+  }
+
+  async function removePool(id: string, name: string) {
+    if (!confirm(`Supprimer le pool "${name}" ?`)) return;
+    await ipc.removePool(id);
+    app.pools = app.pools.filter((p) => p.id !== id);
+    showToast(`Pool supprimé : ${name}`);
   }
 
   async function removeSource(id: string, name: string) {
@@ -82,14 +123,60 @@
             </span>
           </div>
         </div>
-        <p class="text-warning bg-base mt-4 rounded p-2.5 text-xs">
-          ⚠ Backup de ta clé privée pas encore exposé dans l'UI — utilise
-          <code class="font-mono">tt identity export</code> en CLI pour l'instant.
-        </p>
+        <div class="border-border mt-5 flex flex-wrap gap-2 border-t pt-4">
+          <button type="button" class="btn-secondary" onclick={onExportIdentity}>
+            <Download size={13} /> Sauvegarder
+          </button>
+          <button type="button" class="btn-secondary" onclick={onImportIdentity}>
+            <Upload size={13} /> Importer un backup
+          </button>
+          <button type="button" class="btn-secondary danger" onclick={forgetIdentity}>
+            <AlertOctagon size={13} /> Oublier
+          </button>
+        </div>
       {:else}
         <p class="text-muted text-sm">Pas d'identité.</p>
       {/if}
     </section>
+
+    <!-- Quick actions -->
+    <section class="bg-elevated border-border mb-6 rounded-xl border p-5">
+      <h2 class="text-primary mb-3 text-sm font-medium">Actions</h2>
+      <div class="flex flex-wrap gap-2">
+        <button type="button" class="btn-secondary" onclick={onCreatePool}>
+          <Layers size={13} /> Créer un pool
+        </button>
+        <button type="button" class="btn-secondary" onclick={onPublish}>
+          <Plus size={13} /> Publier un magnet
+        </button>
+      </div>
+    </section>
+
+    <!-- Pools -->
+    {#if app.pools.length > 0}
+      <section class="bg-elevated border-border mb-6 rounded-xl border p-5">
+        <h2 class="text-primary mb-3 text-sm font-medium">
+          Pools ({app.pools.length})
+        </h2>
+        <ul class="divide-border divide-y">
+          {#each app.pools as p}
+            <li class="flex items-center gap-3 py-2.5">
+              <code class="text-muted text-xs">{p.id.slice(0, 8)}</code>
+              <span class="text-primary flex-1 text-sm">{p.name}</span>
+              <span class="text-muted text-[10px]">{p.member_ids.length} src</span>
+              <button
+                type="button"
+                class="text-muted hover:text-danger"
+                onclick={() => removePool(p.id, p.name)}
+                aria-label="Supprimer"
+              >
+                <Trash2 size={14} />
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </section>
+    {/if}
 
     <!-- Sources -->
     <section class="bg-elevated border-border mb-6 rounded-xl border p-5">

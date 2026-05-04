@@ -6,6 +6,7 @@ pub mod dto;
 pub mod identity;
 pub mod magnet;
 pub mod pool;
+pub mod publish;
 pub mod search;
 pub mod source;
 pub mod stats;

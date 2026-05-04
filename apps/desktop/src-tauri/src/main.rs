@@ -40,6 +40,10 @@ fn main() {
             ipc::search::search,
             ipc::identity::identity_show,
             ipc::identity::identity_init,
+            ipc::identity::identity_export,
+            ipc::identity::identity_import,
+            ipc::identity::identity_forget,
+            ipc::publish::publish,
             ipc::magnet::open_magnet,
             ipc::stats::stats,
         ])

@@ -51,6 +51,31 @@ export const ipc = {
   async identityInit(name: string | null): Promise<IdentityDto> {
     return invoke("identity_init", { name });
   },
+  async identityExport(path: string, passphrase: string): Promise<number> {
+    return invoke("identity_export", { path, passphrase });
+  },
+  async identityImport(
+    path: string,
+    passphrase: string,
+    force: boolean,
+  ): Promise<IdentityDto> {
+    return invoke("identity_import", { path, passphrase, force });
+  },
+  async identityForget(): Promise<void> {
+    return invoke("identity_forget");
+  },
+  async publish(args: {
+    magnet: string;
+    targetSourceId: string;
+    title: string;
+    category: string;
+    tags: string[];
+    quality: unknown | null;
+    languages: unknown[];
+    sizeBytes: number | null;
+  }): Promise<SearchHitDto> {
+    return invoke("publish", args);
+  },
   async stats(): Promise<StatsDto> {
     return invoke("stats");
   },

@@ -81,7 +81,7 @@ pub struct StatsDto {
     pub entries: i64,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub struct SearchHitDto {
     pub id: String,
     pub title: String,
