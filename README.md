@@ -107,7 +107,7 @@ TorrentsTrackers/
 ## Install
 
 Pre-built bundles are produced by CI on every `v*` tag and uploaded to
-the [GitHub Releases](https://github.com/loicdelez/TorrentsTrackers/releases)
+the [GitHub Releases](https://github.com/Louisdelez/TorrentsTrackers/releases)
 page.
 
 | Platform | Artefact | Size |

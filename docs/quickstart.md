@@ -8,21 +8,21 @@ working setup.
 ### Linux (Debian / Ubuntu)
 
 ```sh
-wget https://github.com/loicdelez/TorrentsTrackers/releases/latest/download/TorrentsTrackers_0.1.0_amd64.deb
+wget https://github.com/Louisdelez/TorrentsTrackers/releases/latest/download/TorrentsTrackers_0.1.0_amd64.deb
 sudo apt install ./TorrentsTrackers_0.1.0_amd64.deb
 ```
 
 ### Linux (Fedora / RHEL)
 
 ```sh
-wget https://github.com/loicdelez/TorrentsTrackers/releases/latest/download/TorrentsTrackers-0.1.0-1.x86_64.rpm
+wget https://github.com/Louisdelez/TorrentsTrackers/releases/latest/download/TorrentsTrackers-0.1.0-1.x86_64.rpm
 sudo dnf install ./TorrentsTrackers-0.1.0-1.x86_64.rpm
 ```
 
 ### Linux (any distro, AppImage)
 
 ```sh
-wget https://github.com/loicdelez/TorrentsTrackers/releases/latest/download/TorrentsTrackers_0.1.0_amd64.AppImage
+wget https://github.com/Louisdelez/TorrentsTrackers/releases/latest/download/TorrentsTrackers_0.1.0_amd64.AppImage
 chmod +x TorrentsTrackers_0.1.0_amd64.AppImage
 ./TorrentsTrackers_0.1.0_amd64.AppImage
 ```
@@ -30,7 +30,7 @@ chmod +x TorrentsTrackers_0.1.0_amd64.AppImage
 ### macOS / Windows
 
 Download the matching artefact from the latest
-[release page](https://github.com/loicdelez/TorrentsTrackers/releases) —
+[release page](https://github.com/Louisdelez/TorrentsTrackers/releases) —
 `.dmg` for macOS, `.msi` or `-setup.exe` for Windows.
 
 ## 2. First launch — onboarding

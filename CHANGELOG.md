@@ -148,6 +148,6 @@ target so far; macOS and Windows are wired up in CI but unverified.
 - `.github/workflows/release.yml` — Tauri bundles + CLI + chat-server
   binaries on `v*` tags, uploaded to the GitHub Release.
 
-[Unreleased]: https://github.com/loicdelez/TorrentsTrackers/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/loicdelez/TorrentsTrackers/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/loicdelez/TorrentsTrackers/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Louisdelez/TorrentsTrackers/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Louisdelez/TorrentsTrackers/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/Louisdelez/TorrentsTrackers/releases/tag/v0.1.0
