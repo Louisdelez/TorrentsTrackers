@@ -207,7 +207,7 @@ async fn run_loop(
                         continue;
                     }
                 };
-                if let Err(e) = ws.send(WsMessage::Text(json.into())).await {
+                if let Err(e) = ws.send(WsMessage::Text(json)).await {
                     let _ = event_tx
                         .send(ChatEvent::Disconnected { reason: e.to_string() })
                         .await;

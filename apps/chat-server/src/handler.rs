@@ -268,7 +268,7 @@ fn verify_message(m: &ChatMessage) -> bool {
 
 async fn send(ws: &mut WebSocket, m: &ServerMessage) -> anyhow::Result<()> {
     let text = serde_json::to_string(m)?;
-    ws.send(Message::Text(text.into())).await?;
+    ws.send(Message::Text(text)).await?;
     Ok(())
 }
 

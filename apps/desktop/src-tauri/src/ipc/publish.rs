@@ -13,6 +13,7 @@ use crate::ipc::dto::SearchHitDto;
 use crate::state::AppState;
 
 #[tauri::command]
+#[allow(clippy::too_many_arguments)]
 pub async fn publish(
     state: State<'_, AppState>,
     magnet: String,

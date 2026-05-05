@@ -117,29 +117,37 @@ mod tests {
 
     #[test]
     fn requires_all_tags() {
-        let mut f = PoolFilters::default();
-        f.tags_required = vec!["1080p".into(), "missing".into()];
+        let f = PoolFilters {
+            tags_required: vec!["1080p".into(), "missing".into()],
+            ..Default::default()
+        };
         assert!(!f.matches(&fixture()));
     }
 
     #[test]
     fn excludes_tags() {
-        let mut f = PoolFilters::default();
-        f.tags_excluded = vec!["VOSTFR".into()];
+        let f = PoolFilters {
+            tags_excluded: vec!["VOSTFR".into()],
+            ..Default::default()
+        };
         assert!(!f.matches(&fixture()));
     }
 
     #[test]
     fn enforces_size_bounds() {
-        let mut f = PoolFilters::default();
-        f.size_max = Some(1024 * 1024 * 1024); // 1 GB max
+        let f = PoolFilters {
+            size_max: Some(1024 * 1024 * 1024),
+            ..Default::default()
+        };
         assert!(!f.matches(&fixture()));
     }
 
     #[test]
     fn enforces_seeders_min() {
-        let mut f = PoolFilters::default();
-        f.seeders_min = Some(200);
+        let f = PoolFilters {
+            seeders_min: Some(200),
+            ..Default::default()
+        };
         assert!(!f.matches(&fixture()));
     }
 }

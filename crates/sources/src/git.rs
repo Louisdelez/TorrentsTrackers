@@ -61,12 +61,9 @@ impl GitRepo {
                 Some(&self.cache_path),
             )
             .await?;
-            run_git(&["reset", "--hard", "origin/HEAD"], Some(&self.cache_path))
-                .await
-                .or_else(|_| {
-                    // Fallback: pick the default branch via symbolic-ref.
-                    Ok::<(), CoreError>(())
-                })?;
+            // Fallback: ignore failures here; the next sync will retry and
+            // `fetch_entries` will surface the real error if needed.
+            let _ = run_git(&["reset", "--hard", "origin/HEAD"], Some(&self.cache_path)).await;
         }
         Ok(())
     }

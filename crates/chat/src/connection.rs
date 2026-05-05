@@ -24,7 +24,7 @@ pub async fn connect(url: &str) -> Result<WsStream> {
 
 pub async fn send(ws: &mut WsStream, msg: &ClientMessage) -> Result<()> {
     let text = serde_json::to_string(msg)?;
-    ws.send(WsMessage::Text(text.into())).await?;
+    ws.send(WsMessage::Text(text)).await?;
     Ok(())
 }
 
